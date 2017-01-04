@@ -7,18 +7,32 @@ Mettre en réseau un jeu de morpion.
 # Protocole de communication client <> serveur
 |   Commande    |   Source    |   Arguments   |   Retour    |   Description   |
 | ------------- | :----------:| ------------- | ----------- | --------------- |
-| UPDATE | Client | NULL | Grille actuelle | Mise à jour de l'environnement de jeu auprès du joueur. |
+| GETSTATE | Client | NULL | Grille actuelle | Récupération et mise à jour de la grille |
+| GETSCORE | Client | NULL | Score actuel | Récupération et mise à jour du score. |
+| CONNECT | Client | Serveur cible | Etat de la connexion | Effectuer une demande de connexion. |
+| DISCONNECT | Client | NULL | Etat de la connexion | Effectuer une demande de déconnexion. |
 | PLACE | Client | Case ciblée | Message d'état | Commande permettant de placer un jeton sur la case spécifiée. Retourne le message d'état post-traitement |
-|
+
 ## Client :
-Cmd "PLACE x" : Le joueur doit pouvoir effectuer des demandes de placement de jetons.
-Cmd "UPDATE" : Le joueur doit pouvoir récupérer les données de la grille.
+### A coder
+Gestion récupération de messages
+Cmd "GETSTATE" : Le joueur doit pouvoir récupérer les données de la grille.
+Cmd "GETSCORE" : Le joueur doit pouvoir récupérer le score.
+
 On imagine ainsi que la gestion de la cohérence est faite par le serveur et garantie au travers des échanges.
 
+### Actions que pourra effectuer le joueur :
+Cmd "PLACE x" : Le joueur doit pouvoir effectuer des demandes de placement de jetons.
+Cmd "CONNECT"
+Cmd "DISCONNECT"
+
 ## Serveur :
-Le serveur doit pouvoir gérer les commandes des joueurs :
+### A coder
+Le serveur doit pouvoir gérer les commandes des joueurs suivantes :
 * PLACE
-* UPDATE
+* GETSTATE
+* GETSCORE
 * CONNECT
 * DISCONNECT
+
 
