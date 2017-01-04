@@ -17,8 +17,8 @@ On imagine ainsi que la gestion de la cohérence est faite par le serveur et gar
 
 ## Serveur :
 Le serveur doit pouvoir gérer les commandes des joueurs :
-    * PLACE
-    * UPDATE
-    * CONNECT
-    * DISCONNECT
+* PLACE
+* UPDATE
+* CONNECT
+* DISCONNECT
 
