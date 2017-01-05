@@ -35,6 +35,9 @@ class grid:
             print("|",symbols[self.cells[i*3]], "|",  symbols[self.cells[i*3+1]], "|",  symbols[self.cells[i*3+2]], "|");
             print("-------------")
 
+    def toString(self):
+        return ' '.join(self.cells)
+
 
     """ Test if 'player' wins the game"""
     def winner(self, player):
@@ -62,6 +65,12 @@ class grid:
         if self.winner(J2):
             return J2
         for i in range(NB_CELLS):
-            if(self.cells[i]== EMPTY):
+            if self.cells[i] == EMPTY:
                 return -1
         return 0
+
+    def isEmpty(self, cell):
+        if self.cells[cell] == 0:
+            return True
+        else:
+            return False

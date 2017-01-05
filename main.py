@@ -1,34 +1,159 @@
 #!/usr/bin/python3
 
-from grid import *
+from cmdServ import *
+from game import *
 import  random
+import select
+import socket
+import sys
 
+# Main de base donne pour le morpion
+# def main():
+#     grids = [grid(), grid(), grid()]
+#     current_player = J1
+#     grids[J1].display()
+#     while grids[0].gameOver() == -1:
+#         if current_player == J1:
+#             shot = -1
+#             while shot <0 or shot >=NB_CELLS:
+#                 shot = int(input ("quel case allez-vous jouer ?"))
+#         else:
+#             shot = random.randint(0,8)
+#             while grids[current_player].cells[shot] != EMPTY:
+#                 shot = random.randint(0,8)
+#         if (grids[0].cells[shot] != EMPTY):
+#             grids[current_player].cells[shot] = grids[0].cells[shot]
+#         else:
+#             grids[current_player].cells[shot] = current_player
+#             grids[0].play(current_player, shot)
+#             current_player = current_player%2+1
+#         if current_player == J1:
+#             grids[J1].display()
+#     print("game over")
+#     grids[0].display()
+#     if grids[0].gameOver() == J1:
+#         print("You win !")
+#     else:
+#         print("you loose !")
+#
+# main()
+#
+
+def formalizeData(msg, cmd):
+    return msg.replace(cmd, "").replace("\n", "")
+
+# Main serveur
 def main():
-    grids = [grid(), grid(), grid()]
-    current_player = J1
-    grids[J1].display()
-    while grids[0].gameOver() == -1:
-        if current_player == J1:
-            shot = -1
-            while shot <0 or shot >=NB_CELLS:
-                shot = int(input ("quel case allez-vous jouer ?"))
-        else:
-            shot = random.randint(0,8)
-            while grids[current_player].cells[shot] != EMPTY:
-                shot = random.randint(0,8)
-        if (grids[0].cells[shot] != EMPTY):
-            grids[current_player].cells[shot] = grids[0].cells[shot]
-        else:
-            grids[current_player].cells[shot] = current_player
-            grids[0].play(current_player, shot)
-            current_player = current_player%2+1
-        if current_player == J1:
-            grids[J1].display()
-    print("game over")
-    grids[0].display()
-    if grids[0].gameOver() == J1:
-        print("You win !")
-    else:
-        print("you loose !")
+    ## Vars
+    # Communication
+    clients = list()
+    # Game
+    gameInstance = game()
+
+    # grids = [grid(), grid(), grid()]
+    # current_player = J1
+    # grids[J1].display()
+
+    # creation du socket d'ecoute
+    ear = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+    ear.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    ear.bind(('', 7777))
+    ear.listen(1)
+    print("Serveur lance")
+    # Boucle d'attente de connexion
+    print("Attente de connexion...")
+    while True:
+        tmp = list(clients)
+        tmp.append(ear)
+        changes = select.select(tmp, list(), list())[0]
+        for client in changes:
+            # Traitement du socket d'ecoute
+            if client == ear:
+                data = client.accept()
+                print("Nouvelle connexion de " + str(data[1]))
+                clients.append(data[0])
+
+            # Sinon reception des donnees
+            else:
+
+                data = client.recv(1500)
+
+                # Traitement deconnexion
+                if len(data) == 0:  # Si la longueur recue est 0 c'est que l'user s'est deconnecte
+                    cmd_disconnect(clients, client)
+
+                # Analyse du paquet
+                # CMD : PLACE
+                if data.startswith("PLACE "):
+                    cmd_place(formalizeData(data, "PLACE "))
+                # CMD : GETSTATE
+                elif data.startswith("GETSTATE"):
+                    cmd_getState(formalizeData(data, "GETSTATE"))
+                # CMD : GETSCORE
+                elif data.startswith("GETSCORE"):
+                    cmd_getScore(formalizeData(data, "GETSCORE"))
+                # CMD : DISCONNECT
+                elif data.startswith("DISCONNECT"):
+                    cmd_disconnect(clients, client)
+
+
+    pass
+
+def prompt():
+    sys.stdout.write('<You> ')
+    sys.stdout.flush()
+
+# Main client
+# TODO : modifier un peu, code choppe sur http://www.binarytides.com/code-chat-application-server-client-sockets-python/
+# TODO 2 : Mettre dans un fichier a part - mainClient.py ? - et implementer les fonctions de traitement de retours de
+# commandes appellees dans cmdClient.py
+def main():
+    # main function
+    if __name__ == "__main__":
+
+        if len(sys.argv) < 3:
+            print 'Usage : python telnet.py hostname port'
+            sys.exit()
+
+        host = sys.argv[1]
+        port = int(sys.argv[2])
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(2)
+
+        # connect to remote host
+        try:
+            s.connect((host, port))
+        except:
+            print 'Unable to connect'
+            sys.exit()
+
+        print 'Connected to remote host. Start sending messages'
+        prompt()
+
+        while 1:
+            socket_list = [sys.stdin, s]
+
+            # Get the list sockets which are readable
+            read_sockets, write_sockets, error_sockets = select.select(socket_list, [], [])
+
+            for sock in read_sockets:
+                # incoming message from remote server
+                if sock == s:
+                    data = sock.recv(4096)
+                    if not data:
+                        print '\nDisconnected from chat server'
+                        sys.exit()
+                    else:
+                        # print data
+                        sys.stdout.write(data)
+                        prompt()
+
+                # user entered a message
+                else:
+                    msg = sys.stdin.readline()
+                    s.send(msg)
+                    prompt()
+    pass
 
 main()
