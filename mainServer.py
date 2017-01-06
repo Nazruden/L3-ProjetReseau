@@ -75,8 +75,6 @@ def main():
                 # Ajout du client a la partie
                 gameInstance.addPlayer(data[0])
 
-                if gameInstance.gameReady:
-                    gameInstance.startGame()
             # Sinon reception des donnees
             else:
 
@@ -92,14 +90,13 @@ def main():
                     if gameInstance.gameReady:
                         gameInstance.place(client, formalizedata(data, "PLACE "))
                     else:
-                        sendError(client, "Game hasn't started yet.")
+                        sendError(client, "Game hasn't started yet.\n")
 
-                # CMD : GETSTATE
-                elif data.startswith(b"GETSTATE"):
-                    cmd_sendstate(formalizedata(data, "GETSTATE"))
-                # CMD : GETSCORE
-                elif data.startswith(b"GETSCORE"):
-                    cmd_sendscore(formalizedata(data, "GETSCORE"))
+                # CMD : JOIN
+                elif data.startswith(b"JOIN"):
+                    if not gameInstance.gameReady:
+                        gameInstance.joinGame(client)
+
                 # CMD : DISCONNECT
                 elif data.startswith(b"DISCONNECT"):
                     cmd_disconnect(gameInstance, clients, client)

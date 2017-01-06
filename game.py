@@ -45,6 +45,16 @@ class game:
         # No player spots available
         if not self.gameReady and self.players[J1] is not None and self.players[J2] is not None:
             self.gameReady = True
+            self.startGame()
+
+
+    def playerToSpectator(self, player):
+        self.spectators.append(self.players[player])
+        self.players[player] = None
+
+    def spectatorToPlayer(self, spectator):
+        self.spectators.remove(spectator)
+        self.addPlayer(spectator)
 
     # removeClient : removes a client (player or spectator) from the game
     def removeClient(self, client):
@@ -52,6 +62,11 @@ class game:
         for player in [J1, J2]:
             if self.players[player] == client:
                 self.players[player] = None
+                # If game was running
+                if self.gameReady:
+                    self.gameReady = False
+                    print("PAUSE - A PLAYER HAS LEFT")
+                    self.sendAll("PAUSE - A PLAYER HAS LEFT\n")
         # Checking in spectators
         for spectator in self.spectators:
             if spectator == client:
@@ -74,16 +89,21 @@ class game:
                     # Sending new grid state to current player and to spectators
                     self.players[self.currentPlayer].send(self.getState(self.players[self.currentPlayer]))
                     self.sendSpectators(self.getState(None))
-                    # Changing turn
-                    self.currentPlayer = self.currentPlayer % 2 + 1
+                    # Checking end of game
+                    if self.grids[0].gameOver() > 0:
+                        self.endGame()
+                    # Or going to next turn
+                    else:
+                        self.currentPlayer = self.currentPlayer % 2 + 1
                 # Cell not empty
                 else:
                     # Updating player grid
                     self.grids[self.currentPlayer].cells[cell] = self.grids[0].cells[cell]
                     # Sending new grid state to current player
                     self.players[self.currentPlayer].send(self.getState(self.players[self.currentPlayer]))
-                # Telling the current player he has to play
-                self.sendTurn(self.players[self.currentPlayer])
+                # Telling the current player he has to play if game didn't end
+                if self.gameReady:
+                    self.sendTurn(self.players[self.currentPlayer])
             # Wrong player
             else:
                 sendError(player, "Ce n'est pas votre tour.\n")
@@ -102,12 +122,18 @@ class game:
     # endGame method :
     def endGame(self):
         print("---- GAME ENDING ----")
-        winner = self.grid.gameOver()
+        winner = self.grids[0].gameOver()
         if winner > 0:
+            self.gameReady = False
             # Incrementing score and sending them with end token
             self.scores[winner] += 1
-            self.sendAll("END " + winner + "\n")
+            self.sendAll("END " + str(winner) + "\n")
             self.sendAll(self.getScore())
+            self.playerToSpectator(J1)
+            self.playerToSpectator(J2)
+            self.sendAll("---------------------\n"
+                         "TYPE \"JOIN\" TO PLAY\n"
+                         "---------------------\n")
             return True
         else:
             return False
@@ -132,7 +158,8 @@ class game:
     # sendPlayers method : sends msg to players
     def sendPlayers(self, msg):
         for player in [J1, J2]:
-            self.players[player].send(msg)
+            if self.players[player] is not None:
+                self.players[player].send(msg)
 
     # sendSpectators method : sends msg to spectators
     def sendSpectators(self, msg):
@@ -155,7 +182,7 @@ class game:
     # getScore method : returns scores as a string
     def getScore(self):
         prefix = "SCORE "
-        return prefix + self.scores[J1] + " " + self.scores[J2]
+        return prefix + str(self.scores[J1]) + " " + str(self.scores[J2]) + "\n"
 
     # getState method : returns grid state as a string
     def getState(self, client):
@@ -169,3 +196,8 @@ class game:
         # State public grid
         else:
             return prefix + self.grids[0].toString() + "\n"
+
+    # joinGame method : manage spectators joining when they ask
+
+    def joinGame(self, client):
+        self.spectatorToPlayer(client)
