@@ -45,6 +45,7 @@ def main():
     ## Vars
     # Communication
     clients = list()
+    spectators = list()
     # Game
     gameInstance = game()
 
@@ -69,10 +70,13 @@ def main():
             if client == ear:
                 data = client.accept()
                 print("Nouvelle connexion de " + str(data[1]))
+                # Ajout du client
                 clients.append(data[0])
+                # Ajout du client a la partie
                 gameInstance.addPlayer(data[0])
+
                 if gameInstance.gameReady:
-                    cmd_start(gameInstance.players)
+                    gameInstance.startGame()
             # Sinon reception des donnees
             else:
 
@@ -80,25 +84,25 @@ def main():
 
                 # Traitement deconnexion
                 if len(data) == 0:  # Si la longueur recue est 0 c'est que l'user s'est deconnecte
-                    cmd_disconnect(clients, client)
+                    cmd_disconnect(gameInstance, clients, client)
 
                 # Analyse du paquet
                 # CMD : PLACE
-                if data.startswith("PLACE "):
+                if data.startswith(b"PLACE "):
                     if gameInstance.gameReady:
-                        cmd_place(formalizedata(data, "PLACE "))
+                        cmd_place(client, gameInstance, formalizedata(data, "PLACE "))
                     else:
                         sendError(client, "Game hasn't started yet.")
 
                 # CMD : GETSTATE
-                elif data.startswith("GETSTATE"):
-                    cmd_getstate(formalizedata(data, "GETSTATE"))
+                elif data.startswith(b"GETSTATE"):
+                    cmd_sendstate(formalizedata(data, "GETSTATE"))
                 # CMD : GETSCORE
-                elif data.startswith("GETSCORE"):
-                    cmd_getscore(formalizedata(data, "GETSCORE"))
+                elif data.startswith(b"GETSCORE"):
+                    cmd_sendscore(formalizedata(data, "GETSCORE"))
                 # CMD : DISCONNECT
-                elif data.startswith("DISCONNECT"):
-                    cmd_disconnect(clients, client)
+                elif data.startswith(b"DISCONNECT"):
+                    cmd_disconnect(gameInstance, clients, client)
 
 
     pass
