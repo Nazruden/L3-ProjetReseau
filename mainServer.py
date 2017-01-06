@@ -56,7 +56,7 @@ def main():
     ear = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
     ear.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     ear.bind(('', 7777))
-    ear.listen(1)
+    ear.listen(3)
     print("Serveur lance")
     # Boucle d'attente de connexion
     print("Attente de connexion...")
@@ -70,7 +70,9 @@ def main():
                 data = client.accept()
                 print("Nouvelle connexion de " + str(data[1]))
                 clients.append(data[0])
-
+                gameInstance.addPlayer(data[0])
+                if gameInstance.gameReady:
+                    cmd_start(gameInstance.players)
             # Sinon reception des donnees
             else:
 
@@ -83,7 +85,11 @@ def main():
                 # Analyse du paquet
                 # CMD : PLACE
                 if data.startswith("PLACE "):
-                    cmd_place(formalizedata(data, "PLACE "))
+                    if gameInstance.gameReady:
+                        cmd_place(formalizedata(data, "PLACE "))
+                    else:
+                        sendError(client, "Game hasn't started yet.")
+
                 # CMD : GETSTATE
                 elif data.startswith("GETSTATE"):
                     cmd_getstate(formalizedata(data, "GETSTATE"))

@@ -1,9 +1,10 @@
 import socket
 from grid import *
+from tools import *
 
 class game:
-    # Grid
-    grid = grid()
+    # Grids
+    grids = [grid(), grid(), grid()]
     # Players - tab of sockets
     players = []
     currentPlayer = None
@@ -31,38 +32,53 @@ class game:
         elif self.players[J2] is None:
             self.players[J2] = client
         if self.players[J1] is not None and self.players[J2] is not None:
-            gameReady = True
-
+            self.gameReady = True
 
     # Players actions and getters
-
     # place method : places a token on a cell
     def place(self, player, cell):
         # Checking if the player is the current one
         if self.players[self.currentPlayer] == player:
             # Checking if cell is empty
             if self.grid.isEmpty(cell):
-                self.grid.play(self.currentPlayer, cell)
+                self.grids[self.currentPlayer].cells[cell] = self.currentPlayer
+                self.grids[0].play(self.currentPlayer, cell)
                 # Changing turn
-                if self.currentPlayer == J1:
-                    self.currentPlayer = J2
-                else:
-                    self.currentPlayer = J1
+                self.currentPlayer = self.currentPlayer % 2 + 1
             # Cell not empty
             else:
-                return "Cette case n'est pas vide.\n"
+                self.grids[self.currentPlayer].cells[cell] = self.grids[0].cells[cell]
         # Wrong player
         else:
-            return "Ce n'est pas votre tour.\n"
+            sendError(player, "Ce n'est pas votre tour.\n")
+
+    # startGame method :
+    def startGame(self):
+        sendAll(self.players, "START\n")
+
+    # endGame method :
+    def endGame(self):
+        winner = self.grid.gameOver()
+        if winner > 0:
+            sendAll(self.players, "END " + winner + "\n")
+            return True
+        else:
+            return False
+
+    def isPlayer(self, client):
+        if self.players[J1] == client or self.players[J2] == client:
+            return True
+        else:
+            return False
 
     # getScore method : returns scores as a string
     def getScore(self):
         return self.scores[J1] + " " + self.scores[J2]
 
     # getState method : returns grid state as a string
-    # TODO : Peut etre changer pour getGridState et différencier de getState ? a voir
     def getState(self):
         return self.grid.toString()
+
 
 
 
