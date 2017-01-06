@@ -90,7 +90,7 @@ def main():
                 # CMD : PLACE
                 if data.startswith(b"PLACE "):
                     if gameInstance.gameReady:
-                        cmd_place(client, gameInstance, formalizedata(data, "PLACE "))
+                        gameInstance.place(client, formalizedata(data, "PLACE "))
                     else:
                         sendError(client, "Game hasn't started yet.")
 
