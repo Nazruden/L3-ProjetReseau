@@ -60,35 +60,44 @@ class game:
     # Players actions and getters
     # place method : places a token on a cell
     def place(self, player, cell):
-        cell = int(cell)
-        # Checking if the player is the current one
-        if self.players[self.currentPlayer] == player:
-            # Checking if cell is empty
-            if self.grid.isEmpty(cell):
-                # Updating player grid
-                self.grids[self.currentPlayer].cells[cell] = self.currentPlayer
-                # Updating public grid
-                self.grids[0].play(self.currentPlayer, cell)
-                # Sending new grid state
-                cmd_sendstate(self.players[self.currentPlayer], self)
-                # Changing turn
-                self.currentPlayer = self.currentPlayer % 2 + 1
-            # Cell not empty
+        if cell is not "":
+            cell = int(cell)
+        if cell < 9 and cell >= 0:
+            # Checking if the player is the current one
+            if self.players[self.currentPlayer] == player:
+                # Checking if cell is empty
+                if self.grids[0].isEmpty(cell):
+                    # Updating player grid
+                    self.grids[self.currentPlayer].cells[cell] = self.currentPlayer
+                    # Updating public grid
+                    self.grids[0].play(self.currentPlayer, cell)
+                    # Sending new grid state to current player and to spectators
+                    self.players[self.currentPlayer].send(self.getState(self.players[self.currentPlayer]))
+                    self.sendSpectators(self.getState(None))
+                    # Changing turn
+                    self.currentPlayer = self.currentPlayer % 2 + 1
+                # Cell not empty
+                else:
+                    # Updating player grid
+                    self.grids[self.currentPlayer].cells[cell] = self.grids[0].cells[cell]
+                    # Sending new grid state to current player
+                    self.players[self.currentPlayer].send(self.getState(self.players[self.currentPlayer]))
+                # Telling the current player he has to play
+                self.sendTurn(self.players[self.currentPlayer])
+            # Wrong player
             else:
-                # Updating player grid
-                self.grids[self.currentPlayer].cells[cell] = self.grids[0].cells[cell]
-                # Sending new grid state
-                cmd_sendstate(self.players[self.currentPlayer], self)
-            # Telling the current player he has to play
-            cmd_yourturn(self.players[self.currentPlayer])
-        # Wrong player
+                sendError(player, "Ce n'est pas votre tour.\n")
+        # Illegal cell
         else:
-            sendError(player, "Ce n'est pas votre tour.\n")
+            sendError(player, "Ceci n'est pas une case valide\n")
+            self.sendTurn(self.players[self.currentPlayer])
 
     # startGame method :
     def startGame(self):
+        # Print game beginning and sends START and TURN tokens
         print("---- GAME STARTING ----")
         self.sendPlayers("START\n")
+        self.sendTurn(self.players[self.currentPlayer])
 
     # endGame method :
     def endGame(self):
@@ -135,18 +144,28 @@ class game:
         self.sendPlayers(self.getScore())
         self.sendSpectators(self.getScore())
 
+    # sendState method : sends appropriate state to specified client
+    def sendState(self, client):
+        client.send(self.getState())
+
+    # sendTurn method : sends turn token to specified player
+    def sendTurn(self, player):
+        player.send("YOURTURN\n")
+
     # getScore method : returns scores as a string
     def getScore(self):
-        return self.scores[J1] + " " + self.scores[J2]
+        prefix = "SCORE "
+        return prefix + self.scores[J1] + " " + self.scores[J2]
 
     # getState method : returns grid state as a string
     def getState(self, client):
+        prefix = "STATE "
         # State J1 grid
         if self.isPlayer(client) == J1:
-            return self.grids[J1].toString()
+            return prefix + self.grids[J1].toString() + "\n"
         # State J2 grid
         elif self.isPlayer(client) == J2:
-            return self.grids[J2].toString()
+            return prefix + self.grids[J2].toString() + "\n"
         # State public grid
         else:
-            return self.grids[0].toString()
+            return prefix + self.grids[0].toString() + "\n"

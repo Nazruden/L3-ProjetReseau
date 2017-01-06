@@ -36,7 +36,7 @@ class grid:
             print("-------------")
 
     def toString(self):
-        return ' '.join(self.cells)
+        return ' '.join(str(cell) for cell in self.cells)
 
 
     """ Test if 'player' wins the game"""
