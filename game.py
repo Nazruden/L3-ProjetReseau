@@ -7,9 +7,11 @@ class game:
     # Players - tab of sockets
     players = []
     currentPlayer = None
+    gameReady = False
     # Scores
     scores = []
 
+    # Game management
     # init Game
     def __init__(self):
         self.grid = grid()
@@ -28,6 +30,9 @@ class game:
         # Assigning to player 2 if available
         elif self.players[J2] is None:
             self.players[J2] = client
+        if self.players[J1] is not None and self.players[J2] is not None:
+            gameReady = True
+
 
     # Players actions and getters
 

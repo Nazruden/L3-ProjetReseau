@@ -2,6 +2,7 @@
 
 from cmdServ import *
 from game import *
+from tools import *
 import random
 import select
 import socket
@@ -38,9 +39,6 @@ import sys
 #
 # main()
 #
-
-def formalizeData(msg, cmd):
-    return msg.replace(cmd, "").replace("\n", "")
 
 # Main serveur
 def main():
@@ -85,13 +83,13 @@ def main():
                 # Analyse du paquet
                 # CMD : PLACE
                 if data.startswith("PLACE "):
-                    cmd_place(formalizeData(data, "PLACE "))
+                    cmd_place(formalizedata(data, "PLACE "))
                 # CMD : GETSTATE
                 elif data.startswith("GETSTATE"):
-                    cmd_getState(formalizeData(data, "GETSTATE"))
+                    cmd_getstate(formalizedata(data, "GETSTATE"))
                 # CMD : GETSCORE
                 elif data.startswith("GETSCORE"):
-                    cmd_getScore(formalizeData(data, "GETSCORE"))
+                    cmd_getscore(formalizedata(data, "GETSCORE"))
                 # CMD : DISCONNECT
                 elif data.startswith("DISCONNECT"):
                     cmd_disconnect(clients, client)

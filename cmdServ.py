@@ -4,11 +4,14 @@ def cmd_disconnect(clients, client):
     clients.remove(client)
     print("Client deconnecte")
 
-def cmd_getState(client, game):
+
+def cmd_getstate(client, game):
     client.send(game.getState())
 
-def cmd_getScore(client, game):
+
+def cmd_getscore(client, game):
     client.send(game.getScore())
+
 
 def cmd_place(client, game, data):
     client.send(game.place(client, data))

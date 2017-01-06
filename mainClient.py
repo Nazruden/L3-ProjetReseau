@@ -2,13 +2,16 @@
 
 from cmdClient import *
 from grid import *
+from tools import *
 import select
 import socket
 import sys
 
+
 def prompt():
     sys.stdout.write('<You> ')
     sys.stdout.flush()
+
 
 # Main client
 # TODO : modifier un peu, code choppe sur http://www.binarytides.com/code-chat-application-server-client-sockets-python/
