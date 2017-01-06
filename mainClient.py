@@ -27,13 +27,7 @@ def main():
     s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 
     # connect to remote host
-    try:
-        s.connect((host, port))
-    except:
-        print('Unable to connect')
-        sys.exit()
-
-    print('Connected to remote host. Start sending messages')
+    connect_to_server(s, host, port)
     prompt()
 
     while 1:
@@ -50,7 +44,7 @@ def main():
                     sys.exit()
                 else:
                     print(repr(data))
-                    prompt()
+                    #if data
 
             # user entered a message
             else:
