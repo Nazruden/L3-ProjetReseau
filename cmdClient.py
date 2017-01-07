@@ -1,12 +1,20 @@
-from tools import * 
+from grid import *
+from tools import *
+import select
+import socket
+import sys
+
 # CMD Interface - Client version
 
 def cmd_convert_data_to_grid(data):
     data = formalizedata(data ,"STATE ")
-    cells = data.split(" ")
-    grid = grid()
-    grid.cells = cells
-    return grid
+    tmp = data.split(" ")
+    cells = []
+    for elem in tmp:
+        cells.append(int(elem))
+    grid_instance = grid()
+    grid_instance.cells = cells
+    return grid_instance
 
 #Connection au serveur
 def connect_to_server(socket, host, port):
@@ -15,12 +23,10 @@ def connect_to_server(socket, host, port):
     except:
         print('Unable to connect')
         sys.exit()
-    print('Connected to remote host. Start sending messages')
+    print('Connected to remote host.\nWelcome on MORPION\n')
 
 # Gestion des retours de commandes
 def cmd_getstate(grid):
-    # TODO : traitement retour de getState -> mise a jour de la grille locale
-    print("cmd_getstate")
     grid.display()
 
 def cmd_getscore(score):
@@ -29,7 +35,7 @@ def cmd_getscore(score):
 def cmd_play():
     place = -1
     while place > 8 or place < 0:
-        place = input("Veuillez choisir une case a jouer comprise entre 0 et 8")
-    return "PLACE " + place
+        place = input("Choisir une case entre 0 et 8\n")
+    return "PLACE " + str(place)
 
     

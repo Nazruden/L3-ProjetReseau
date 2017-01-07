@@ -2,6 +2,8 @@
 def formalizedata(msg, cmd):
     return msg.replace(cmd, "").replace("\n", "")
 
+def split_data(data):
+    return data.split('\n')
 
 def sendAll(clients, msg):
     for client in clients:

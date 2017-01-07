@@ -32,23 +32,32 @@ def main():
         for sock in read_sockets:
             # incoming message from remote server
             if sock == s:
-                data = sock.recv(4096)
+                data = sock.recv(1500)
                 if not data:
                     print('\nDisconnected from chat server')
                     sys.exit()
+                else:
                     # Analyse paquets serveur
-                if data.startswith(b"START"):
-                    print(repr(data))
-                #YOURTURN
-                if data.startswith(b"YOURTURN"):
-                    print("YOURTURN", repr(data))
-                    place = cmd_play()
-                    s.send(place.encode())
+                    cmds = split_data(data)
+                    for cmd in cmds:
+                        print(cmd)
+                        #START
+                        if cmd.startswith(b"START"):
+                            data = formalizedata(data, "START")
+                            print("GAME START")
 
-                #GETSATE
-                if data.startswith(b"STATE"):
-                    print("STATE", repr(data))
-                    cmd_getstate(cmd_convert_data_to_grid(data))
+                        #GETSATE
+                        if cmd.startswith(b"STATE"):
+                            cmd_getstate(cmd_convert_data_to_grid(cmd))
+
+                        #YOURTURN
+                        if cmd.startswith(b"YOURTURN"):
+                            print("YOUR TURN")
+                            place = cmd_play()
+                            s.send(place.encode())
+            elif sock == sys.stdin:
+                s.send(sys.stdin.read(1500))
+                        
             # user entered a message
             #else:
              #   msg = sys.stdin.readline()

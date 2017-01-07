@@ -125,6 +125,7 @@ class game:
         winner = self.grids[0].gameOver()
         if winner > 0:
             self.gameReady = False
+            self.grids = [grid(), grid(), grid()]
             # Incrementing score and sending them with end token
             self.scores[winner] += 1
             self.sendAll("END " + str(winner) + "\n")
