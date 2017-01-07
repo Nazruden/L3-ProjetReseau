@@ -35,13 +35,18 @@ class game:
         if self.players[J1] is None:
             self.players[J1] = client
             self.scores[J1] = 0
+            # if self.gameReady:
+            self.players[J1].send(self.getState(self.players[J1]))
         # Assigning to player 2 if available
         elif self.players[J2] is None:
             self.players[J2] = client
             self.scores[J2] = 0
+            # if self.gameReady:
+            self.players[J2].send(self.getState(self.players[J2]))
         # Assigning to spectators otherwise
         else:
             self.spectators.append(client)
+            client.send(self.getState(None))
         # No player spots available
         if not self.gameReady and self.players[J1] is not None and self.players[J2] is not None:
             self.gameReady = True
@@ -116,7 +121,8 @@ class game:
     def startGame(self):
         # Print game beginning and sends START and TURN tokens
         print("---- GAME STARTING ----")
-        self.sendPlayers("START\n")
+        self.players[J1].send("START " + str(J1) + "\n")
+        self.players[J2].send("START " + str(J2) + "\n")
         self.sendTurn(self.players[self.currentPlayer])
 
     # endGame method :

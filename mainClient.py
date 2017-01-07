@@ -9,7 +9,6 @@ import sys
 
 
 def prompt():
-    sys.stdout.write('<You> ')
     sys.stdout.flush()
 
 def main():
@@ -21,10 +20,10 @@ def main():
     port = 7777
     s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 
-    # connect to remote host
+    # Connect to remote host
     connect_to_server(s, host, port)
 
-    while 1:
+    while True:
         socket_list = [sys.stdin, s]
         # Get the list sockets which are readable
         read_sockets, write_sockets, error_sockets = select.select(socket_list, [], [])
@@ -34,34 +33,41 @@ def main():
             if sock == s:
                 data = sock.recv(1500)
                 if not data:
-                    print('\nDisconnected from chat server')
+                    print('\nDisconnected from server')
                     sys.exit()
                 else:
                     # Analyse paquets serveur
                     cmds = split_data(data)
                     for cmd in cmds:
                         print(cmd)
-                        #START
+                        # START
                         if cmd.startswith(b"START"):
-                            data = formalizedata(data, "START")
-                            print("GAME START")
+                            cmdData = formalizedata(cmd, "START ")
+                            print("GAME STARTS - You're player " + cmdData)
 
-                        #GETSATE
+                        # STATE
                         if cmd.startswith(b"STATE"):
                             cmd_getstate(cmd_convert_data_to_grid(cmd))
 
-                        #YOURTURN
+                        # YOURTURN
                         if cmd.startswith(b"YOURTURN"):
-                            print("YOUR TURN")
+                            print("IT IS YOUR TURN TO PLAY")
                             place = cmd_play()
                             s.send(place.encode())
-            elif sock == sys.stdin:
-                s.send(sys.stdin.read(1500))
-                        
-            # user entered a message
-            #else:
-             #   msg = sys.stdin.readline()
-              #  s.send(msg.encode())
+
+                        # SCORE
+                        if cmd.startswith(b"SCORE"):
+                            cmdData = formalizedata(cmd, "SCORE ")
+                            cmdData = cmdData.split(' ')
+                            print("SCORE IS : PLAYER 1 - " + cmdData[0] + " | PLAYER 2 - " + cmdData[1])
+
+                        # END
+                        if cmd.startswith(b"END"):
+                            cmdData = formalizedata(cmdData, "END ")
+                            print("GAME HAD ENDED - PLAYER " + cmdData + " WINS !")
+            else:
+                msg = sys.stdin.readline()
+                s.send(msg)
     pass
 
 main()

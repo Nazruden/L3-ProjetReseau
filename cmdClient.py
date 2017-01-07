@@ -16,7 +16,8 @@ def cmd_convert_data_to_grid(data):
     grid_instance.cells = cells
     return grid_instance
 
-#Connection au serveur
+
+# Connection au serveur
 def connect_to_server(socket, host, port):
     try:
         socket.connect((host, port))
@@ -25,12 +26,15 @@ def connect_to_server(socket, host, port):
         sys.exit()
     print('Connected to remote host.\nWelcome on MORPION\n')
 
+
 # Gestion des retours de commandes
 def cmd_getstate(grid):
     grid.display()
 
+
 def cmd_getscore(score):
     print("SCORE : " + score)
+
 
 def cmd_play():
     place = -1
