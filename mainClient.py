@@ -63,7 +63,7 @@ def main():
 
                         # END
                         if cmd.startswith(b"END"):
-                            cmdData = formalizedata(cmdData, "END ")
+                            cmdData = formalizedata(cmd, "END ")
                             print("GAME HAD ENDED - PLAYER " + cmdData + " WINS !")
             else:
                 msg = sys.stdin.readline()

@@ -27,20 +27,18 @@ class game:
         self.currentPlayer = J1
         for i in [J1, J2]:
             self.players[i] = None
-            self.scores[i] = None
+            self.scores[i] = 0
 
     # addPlayer method : adds a player to the game
     def addPlayer(self, client):
         # Assigning to player 1 if available
         if self.players[J1] is None:
             self.players[J1] = client
-            self.scores[J1] = 0
             # if self.gameReady:
             self.players[J1].send(self.getState(self.players[J1]))
         # Assigning to player 2 if available
         elif self.players[J2] is None:
             self.players[J2] = client
-            self.scores[J2] = 0
             # if self.gameReady:
             self.players[J2].send(self.getState(self.players[J2]))
         # Assigning to spectators otherwise
