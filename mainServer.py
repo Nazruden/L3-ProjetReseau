@@ -19,7 +19,7 @@ def main():
     gameInstance = game()
 
     # creation du socket d'ecoute
-    ear = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+    ear = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ear.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     ear.bind(('', 7777))
     ear.listen(3)

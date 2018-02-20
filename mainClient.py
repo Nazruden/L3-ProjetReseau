@@ -18,7 +18,7 @@ def main():
 
     host = sys.argv[1]
     port = 7777
-    s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # Connect to remote host
     connect_to_server(s, host, port)
@@ -36,6 +36,7 @@ def main():
                     print('\nDisconnected from server')
                     sys.exit()
                 else:
+
                     # Analyse paquets serveur
                     cmds = split_data(data)
                     for cmd in cmds:

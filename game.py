@@ -35,7 +35,7 @@ class game:
         if self.players[J1] is None:
             self.players[J1] = client
             # if self.gameReady:
-            self.players[J1].send(self.getState(self.players[J1]))
+            self.players[J1].send(self.getState(self.players[J1]).encode())
         # Assigning to player 2 if available
         elif self.players[J2] is None:
             self.players[J2] = client
